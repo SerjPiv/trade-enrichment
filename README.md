@@ -57,7 +57,7 @@ spring.servlet.multipart.max-request-size=50000KB
 ````
 
 ### Comment on the design
-1. The code employs a straightforward design with a single controller and service.
+1. The code employs a straightforward design with a single controller and services for enriching trades and providing product names.
 2. Enrichment logic is parallelized based on the number of cores.
 3. The OpenCSV third-party library is utilized for working with CSV files.
 4. The design prioritizes speed and memory efficiency, which is why the stream API is avoided for filtration and processing.
@@ -70,6 +70,17 @@ Assuming the solution should be able to scale horizontally to handle high traffi
 1. Streaming Trade Data: Introduce a messaging system (such as Kafka) to handle real-time trade data. This allows for efficient data ingestion and processing across multiple instances.
 2. Database Persistence: Save enriched data to a database. Distribute the workload by using sharding or partitioning.
 3. API Enhancements: Provide pagination and filtration options in the API. Users can retrieve specific subsets of data efficiently.
+
+#### Cache for Product Mapping:
+1. Cache Mechanism: Use external caching solutions like Redis to store product mappings.
+
+#### Additional CSV validation:
+1. Check if all required fields are present (date, product_id, currency, price).
+2. Verify that currency follows a specific format (e.g., three-letter ISO currency code).
+3. Ensure that price is a valid numerical value. 
+4. Validate that the price falls within an acceptable range (e.g., non-negative value).
+5. Ensure that product_id is an integer.
+6. Ensure that the date falls within a specific range (e.g., within the last 10 years).
 
 #### Minor Improvements:
 1. Error Handling: Enhance error handling mechanisms in the controller. Properly handle exceptions and provide meaningful error messages to clients.

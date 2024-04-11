@@ -1,19 +1,15 @@
 package com.verygoodbank.tes.web.service;
 
-import com.verygoodbank.tes.web.domain.Product;
+import com.verygoodbank.tes.web.domain.ProductService;
 import com.verygoodbank.tes.web.domain.Trade;
 import com.verygoodbank.tes.web.domain.TradeEnrichmentService;
-import com.verygoodbank.tes.web.util.CSVParser;
 import com.verygoodbank.tes.web.util.DateValidator;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -22,8 +18,7 @@ import java.util.concurrent.Future;
 @RequiredArgsConstructor
 public class DefaultTradeEnrichmentService implements TradeEnrichmentService {
 
-    private final String productFileName;
-    private volatile ConcurrentHashMap<Long, String> productIdToProductName;
+    private final ProductService productService;
 
     public List<Trade> enrichTrades(List<Trade> trades) {
         log.info("Started enriching trades...");
@@ -64,22 +59,9 @@ public class DefaultTradeEnrichmentService implements TradeEnrichmentService {
                 continue;
             }
             long productId = trade.getProductId();
-            String productName = productIdToProductName.get(productId);
-            if (productName == null) {
-                log.error("Product name is null for productId: {}. Setting default product name [Missing Product Name]", productId);
-                trade.setProductName("Missing Product Name");
-            } else {
-                trade.setProductName(productName);
-            }
+            String productName = productService.getProductName(productId);
+            trade.setProductName(productName);
         }
         return trades;
-    }
-
-    @PostConstruct
-    public void initProductMap() {
-        productIdToProductName = new ConcurrentHashMap<>();
-        ClassLoader classLoader = getClass().getClassLoader();
-        List<Product> products = CSVParser.parseProductCsv(new File(classLoader.getResource(productFileName).getFile()));
-        products.forEach(product -> productIdToProductName.put(product.getProductId(), product.getProductName()));
     }
 }
