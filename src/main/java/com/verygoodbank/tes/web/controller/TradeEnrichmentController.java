@@ -1,8 +1,6 @@
 package com.verygoodbank.tes.web.controller;
 
-import com.verygoodbank.tes.web.domain.TradeEnrichmentService;
-import com.verygoodbank.tes.web.util.CSVConverter;
-import com.verygoodbank.tes.web.util.CSVParser;
+import com.verygoodbank.tes.web.service.StreamingTradeEnrichmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -20,13 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class TradeEnrichmentController {
-    private final TradeEnrichmentService tradeEnrichmentService;
+    private final StreamingTradeEnrichmentService streamingTradeEnrichmentService;
 
     @PostMapping("/enrich")
     public ResponseEntity enrichProduct(@RequestParam("file") MultipartFile file) {
         if (file != null && !file.isEmpty()) {
             try {
-                String csvString = CSVConverter.convertToCsv(tradeEnrichmentService.enrichTrades(CSVParser.parseTradeCsv(file)));
+                String csvString = streamingTradeEnrichmentService.enrichTrades(file);
                 return buildResponse(csvString);
             } catch (Exception e) {
                 return ResponseEntity.internalServerError()

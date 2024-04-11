@@ -47,10 +47,8 @@ curl -F "file=@src/test/resources/trade.csv" http://localhost:8080/api/v1/enrich
 
 ### Limitations of the code
 1. The solution scales only vertically by allocating additional resources to a single machine.
-2. When dealing with large CSV files, there's a significant memory consumption due to storing all data in memory.
-3. Validations are currently absent for fields other than the data field.
-4. Concurrent processing for data enrichment is constrained by the number of available cores.
-5. The input CSV size is currently capped at 50MB but can be expanded using the following properties:
+2. Validations are currently absent for fields other than the data field.
+3. The input CSV size is currently capped at 50MB but can be expanded using the following properties:
 ````
 spring.servlet.multipart.max-file-size=50000KB
 spring.servlet.multipart.max-request-size=50000KB
@@ -58,9 +56,8 @@ spring.servlet.multipart.max-request-size=50000KB
 
 ### Comment on the design
 1. The code employs a straightforward design with a single controller and services for enriching trades and providing product names.
-2. Enrichment logic is parallelized based on the number of cores.
+2. The trades are enriched immediate while reading from the file line by line, which saves memory and processing time.
 3. The OpenCSV third-party library is utilized for working with CSV files.
-4. The design prioritizes speed and memory efficiency, which is why the stream API is avoided for filtration and processing.
 
 ### Improvement if there were more time available.
 When considering potential improvements for the solution, it’s essential to take into account both functional and non-functional requirements. Let’s explore some enhancements:
